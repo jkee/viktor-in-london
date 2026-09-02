@@ -1,0 +1,509 @@
+:root {
+  --navy: #10069f;
+  --red: #dc241f;
+  --ink: #1c1f2e;
+  --muted: #6f7387;
+  --line: rgba(28, 31, 46, 0.08);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+  background: #e8e8e4;
+}
+
+/* Mute the base map so the heat colors stand out. */
+.base-tiles {
+  filter: grayscale(0.85) brightness(1.06) contrast(0.96);
+}
+
+/* ---------- Panel ---------- */
+
+.panel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  width: 248px;
+  padding: 20px 20px 16px;
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(16, 20, 60, 0.14), 0 1px 3px rgba(16, 20, 60, 0.08);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* the VIKTOR roundel mark */
+.mark {
+  flex: none;
+  width: 38px;
+  height: 38px;
+}
+
+.mark--small {
+  width: 28px;
+  height: 28px;
+}
+
+.brand-text h1 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  margin-top: 1px;
+}
+
+/* ---------- Toggle rows ---------- */
+
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: 7px 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.row .txt {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* small cursive source tag next to a layer name */
+.src {
+  font-size: 10px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.src a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+}
+
+.src a:hover {
+  color: var(--navy);
+}
+
+.row input {
+  display: none;
+}
+
+.sw {
+  margin-left: auto;
+  flex: none;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  background: rgba(28, 31, 46, 0.16);
+  position: relative;
+  transition: background 0.18s ease;
+}
+
+.sw::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.18s ease;
+}
+
+.row input:checked ~ .sw {
+  background: var(--navy);
+}
+
+.row input:checked ~ .sw::after {
+  transform: translateX(14px);
+}
+
+.row:hover .sw {
+  filter: brightness(1.08);
+}
+
+.divider {
+  height: 1px;
+  background: var(--line);
+  margin: 10px 0 12px;
+}
+
+/* ---------- Legend ---------- */
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.legend-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right,
+    rgb(215, 48, 39),
+    rgb(254, 224, 139),
+    rgb(26, 152, 80));
+}
+
+.legend-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+/* ---------- Mobile: panel collapsed behind the roundel button ---------- */
+
+.panel-toggle {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1001;
+  width: 46px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 6px 24px rgba(16, 20, 60, 0.18);
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .panel-toggle {
+    display: flex;
+  }
+
+  .panel {
+    display: none;
+    top: 68px;
+    right: 12px;
+    left: auto;
+    width: min(248px, calc(100vw - 24px));
+    max-height: calc(100vh - 84px);
+    overflow-y: auto;
+  }
+
+  .panel.open {
+    display: block;
+  }
+}
+
+.about-link {
+  display: block;
+  margin-top: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.about-link:hover {
+  color: var(--navy);
+}
+
+/* ---------- About page ---------- */
+
+.about-page {
+  overflow: auto;
+  background: #f4f3f0;
+}
+
+.about {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.about .brand {
+  margin-bottom: 24px;
+}
+
+.about h1 {
+  font-size: 22px;
+}
+
+.about h2 {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 28px 0 6px;
+}
+
+.about p {
+  font-size: 14.5px;
+  line-height: 1.65;
+  margin: 8px 0;
+  color: var(--ink);
+}
+
+.about .lede {
+  font-size: 16px;
+}
+
+.about a {
+  color: var(--navy);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(16, 6, 159, 0.25);
+}
+
+.about a:hover {
+  border-bottom-color: var(--navy);
+}
+
+.about .formula {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  background: rgba(28, 31, 46, 0.05);
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+.about .disclaimer {
+  margin-top: 32px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.about .back-link {
+  display: inline-block;
+  margin-top: 20px;
+  font-weight: 700;
+  border: none;
+}
+
+/* ---------- "Show me" locate button ---------- */
+
+.locate-btn {
+  position: absolute;
+  bottom: 28px;
+  right: 12px;
+  z-index: 1001;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 6px 24px rgba(16, 20, 60, 0.18);
+  cursor: pointer;
+  padding: 0;
+  color: var(--navy);
+}
+
+.locate-btn:hover {
+  background: #fff;
+}
+
+.locate-btn.locating svg {
+  animation: locate-pulse 1s ease-in-out infinite;
+}
+
+@keyframes locate-pulse {
+  50% { opacity: 0.3; }
+}
+
+/* the "you are here" dot */
+.me-dot {
+  background: var(--navy);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(16, 6, 159, 0.45);
+  animation: me-pulse 2s ease-out infinite;
+}
+
+@keyframes me-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(16, 6, 159, 0.45); }
+  70% { box-shadow: 0 0 0 14px rgba(16, 6, 159, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 6, 159, 0); }
+}
+
+/* ---------- Toast ---------- */
+
+.toast {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  z-index: 1002;
+  background: rgba(28, 31, 46, 0.92);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  max-width: 86vw;
+  text-align: center;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ---------- Marker badges ----------
+   .badge is the shared round emoji chip; each layer has a color variant,
+   and a "-bold" variant marks the top tier (★★★ cafes, 9.0+ food, hub stations). */
+
+.badge {
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(16, 20, 60, 0.28);
+}
+
+.badge--coffee { border: 1px solid #b08968; font-size: 12px; }
+.badge--coffee-bold { border: 2px solid #7f4f24; background: #fff3e0; }
+
+.badge--food { border: 1px solid #845ef7; }
+.badge--food-bold { border: 2px solid #5f3dc4; background: #f3f0ff; }
+
+.badge--station { border: 1px solid #4263eb; }
+.badge--station-bold { border: 2px solid var(--navy); background: #edf2ff; }
+
+.badge--wealth { border: 1px solid #74a12e; background: #f7fbe8; }
+
+/* ---------- Leaflet chrome ---------- */
+
+.leaflet-container {
+  font-family: "Hanken Grotesk", -apple-system, sans-serif;
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(16, 20, 60, 0.16) !important;
+}
+
+.leaflet-control-zoom a {
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: #fff !important;
+  color: var(--navy) !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.7) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-size: 9px !important;
+  color: var(--muted) !important;
+  border-radius: 8px 0 0 0;
+}
+
+.leaflet-control-scale-line {
+  font-family: "Hanken Grotesk", -apple-system, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.75) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid var(--ink) !important;
+  border-top: none !important;
+  border-radius: 0 0 6px 6px;
+  padding: 2px 6px 1px;
+  box-shadow: 0 2px 8px rgba(16, 20, 60, 0.12);
+}
+
+/* ---------- Popups ---------- */
+
+.leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(16, 20, 60, 0.2);
+  padding: 4px 2px;
+}
+
+.leaflet-popup-content {
+  margin: 10px 14px;
+  font-family: "Hanken Grotesk", -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 2px 8px rgba(16, 20, 60, 0.12);
+}
+
+.note-popup {
+  max-width: 240px;
+}
+
+.note-popup .score {
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  margin-bottom: 3px;
+}
+
+.note-popup .date {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 6px;
+}
