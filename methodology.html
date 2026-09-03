@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Methodology — Viktor in London</title>
+  <meta name="description" content="How every layer of the Viktor in London map is built, and where the data comes from.">
+  <link rel="icon" href="img/apple-touch-icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="about-page">
+  <main class="about">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="29.5" fill="none" stroke="#e21b22" stroke-width="14"/>
+        <rect x="4.5" y="42.5" width="91" height="15" rx="2.8" fill="#1418a8"/>
+        <text x="51" y="50.6" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="800" letter-spacing="2.2" fill="#fff" font-family="Hanken Grotesk, Arial, sans-serif">VIKTOR</text>
+      </svg>
+      <div class="brand-text">
+        <h1>Viktor in London</h1>
+        <div class="sub">methodology &middot; data sources</div>
+      </div>
+    </div>
+
+    <p class="lede">
+      A personal map for one question: <strong>where in London do I want to live?</strong>
+      The core signal is my own scored walk notes; everything else is reference data
+      layered around them. All layers cover roughly TfL fare Zones 1–2, filtered to
+      the dashed area on the map plus a 500&nbsp;m margin.
+    </p>
+
+    <section>
+      <h2>My notes</h2>
+      <p>Voice memos recorded while walking, transcribed, geocoded and scored from
+      −5 (<em>not for me</em>) to +5 (<em>home</em>) — shown as colored dots.
+      Entirely subjective, deliberately so.</p>
+    </section>
+
+    <section>
+      <h2>Heat map (liveability)</h2>
+      <p>A computed 0–1 score blending how reachable four things are on foot,
+      with distance decay and diminishing returns (the 2nd nearby café matters
+      far more than the 12th):</p>
+      <p class="formula">score = 0.35·connectivity + 0.30·coffee + 0.20·food + 0.15·good&nbsp;life</p>
+      <p>Hub stations count triple; ★★★ cafes and 9.0+ restaurants double;
+      Aesop is excluded from good life while full supermarkets weigh extra.
+      Red = amenity desert, green = everything at your doorstep. Full
+      methodology lives in the project's <code>docs/livability.md</code>.
+      Note it measures <em>amenity access only</em> — Soho maxes out precisely
+      because it's Soho; peace and safety are what the walk notes and crime
+      layer are for.</p>
+    </section>
+
+    <section>
+      <h2>Coffee</h2>
+      <p>Two sources. Independent cafes come from
+      <a href="https://propercoffee.app/london">propercoffee.app</a> — only their
+      ★★★&nbsp;Purist and ★★&nbsp;Specialty tiers (the "Everyday" tier is skipped).
+      Chain locations (Kiss the Hippo, WatchHouse, Rosslyn, Hagen, Origin, Ozone,
+      Qima) come from each chain's official location pages. Bold-ringed badges are
+      the ★★★ destination-grade places.</p>
+    </section>
+
+    <section>
+      <h2>Food 8.0+</h2>
+      <p>Restaurants from <a href="https://www.theinfatuation.com/london">The
+      Infatuation</a>'s London reviews (~2,500 reviews scanned, Aug&nbsp;2026).
+      Kept: rating ≥ 8.0, price £–£££, minus obvious fine-dining, tasting-menu and
+      special-occasion-only places — this is a casual-eating map. Bold ring =
+      rated 9.0 or higher.</p>
+    </section>
+
+    <section>
+      <h2>Stations</h2>
+      <p>Every Underground, Elizabeth line, Overground, DLR and rail station in
+      fare Zones 1–2, from the official
+      <a href="https://api.tfl.gov.uk">TfL API</a>. Bold ring = well-connected:
+      three or more lines, an Elizabeth line stop, or a major interchange.</p>
+    </section>
+
+    <section>
+      <h2>Good life 🥑</h2>
+      <p>A tongue-in-cheek gentrification index: branches of Waitrose,
+      GAIL's, Aesop and Whole Foods, from their official store finders
+      (Sep&nbsp;2026). Where these cluster, the flat whites are reliable and the
+      rent is not.</p>
+    </section>
+
+    <section>
+      <h2>Crime heat</h2>
+      <p>Recorded crime from the Metropolitan Police via the
+      <a href="https://data.london.gov.uk/dataset/recorded_crime_summary">London
+      Datastore</a> (LSOA-level, 12 months to Jul&nbsp;2026). Each small
+      statistical area gets a severity score:</p>
+      <p class="formula">score = 0.7 × violent&nbsp;crime&nbsp;density + 0.3 × theft&nbsp;density</p>
+      <p>where <em>violent crime</em> = violence <strong>with injury</strong> +
+      homicide + personal robbery + residential burglary (threats, harassment and
+      no-injury assault are deliberately excluded — about 74% of the raw "violence"
+      bucket involves no physical harm), and <em>theft</em> = theft from the person
+      + other theft + bicycle theft (no shoplifting). Densities are per km² of each
+      area's true size, each component normalized to its own 95th percentile, and
+      the color ramp saturates at the 99th percentile of the score. Positions are
+      area centroids (<a href="https://geoportal.statistics.gov.uk">ONS</a>), so
+      the surface has ~250&nbsp;m resolution — read it street-corridor by street-corridor,
+      not door by door.</p>
+    </section>
+
+    <p class="disclaimer">
+      Ratings belong to their publishers; crime data © Crown copyright, licensed
+      under the Open Government Licence; map ©
+      <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.
+      Everything here is a personal research notebook, not advice.
+    </p>
+
+    <a class="back-link" href="/">← back to the map</a>
+    <a class="back-link" href="about.html" style="margin-left:16px">about this project →</a>
+  </main>
+</body>
+</html>

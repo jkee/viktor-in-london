@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>About — Viktor in London</title>
-  <meta name="description" content="Where the data on the Viktor in London map comes from.">
+  <meta name="description" content="Why this map exists — a personal project about finding a good place to live in London.">
   <link rel="icon" href="img/apple-touch-icon.png" type="image/png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,101 +22,60 @@
       </svg>
       <div class="brand-text">
         <h1>Viktor in London</h1>
-        <div class="sub">about the data</div>
+        <div class="sub">about this project</div>
       </div>
     </div>
 
-    <p class="lede">
-      A personal map for one question: <strong>where in London do I want to live?</strong>
-      The core signal is my own scored walk notes; everything else is reference data
-      layered around them. All layers cover roughly TfL fare Zones 1–2, filtered to
-      the dashed area on the map plus a 500&nbsp;m margin.
-    </p>
+    <p class="lede">Hi, I’m Victor.</p>
 
-    <section>
-      <h2>My notes</h2>
-      <p>Voice memos recorded while walking, transcribed, geocoded and scored from
-      −5 (<em>not for me</em>) to +5 (<em>home</em>) — shown as colored dots.
-      Entirely subjective, deliberately so.</p>
-    </section>
+    <p>I moved to London recently, and one of the things I’ve been really
+    interested in is figuring out where to live and what actually makes a good
+    neighbourhood in London.</p>
 
-    <section>
-      <h2>Heat map (liveability)</h2>
-      <p>A computed 0–1 score blending how reachable four things are on foot,
-      with distance decay and diminishing returns (the 2nd nearby café matters
-      far more than the 12th):</p>
-      <p class="formula">score = 0.35·connectivity + 0.30·coffee + 0.20·food + 0.15·good&nbsp;life</p>
-      <p>Hub stations count triple; ★★★ cafes and 9.0+ restaurants double;
-      Aesop is excluded from good life while full supermarkets weigh extra.
-      Red = amenity desert, green = everything at your doorstep. Full
-      methodology lives in the project's <code>docs/livability.md</code>.
-      Note it measures <em>amenity access only</em> — Soho maxes out precisely
-      because it's Soho; peace and safety are what the walk notes and crime
-      layer are for.</p>
-    </section>
+    <p>For me, it’s important to live somewhere with great coffee, good
+    restaurants and places to eat nearby, a nice environment, good
+    connectivity, and, of course, somewhere that feels safe.</p>
 
-    <section>
-      <h2>Coffee</h2>
-      <p>Two sources. Independent cafes come from
-      <a href="https://propercoffee.app/london">propercoffee.app</a> — only their
-      ★★★&nbsp;Purist and ★★&nbsp;Specialty tiers (the "Everyday" tier is skipped).
-      Chain locations (Kiss the Hippo, WatchHouse, Rosslyn, Hagen, Origin, Ozone,
-      Qima) come from each chain's official location pages. Bold-ringed badges are
-      the ★★★ destination-grade places.</p>
-    </section>
+    <p>So I built this little project.</p>
 
-    <section>
-      <h2>Food 8.0+</h2>
-      <p>Restaurants from <a href="https://www.theinfatuation.com/london">The
-      Infatuation</a>'s London reviews (~2,500 reviews scanned, Aug&nbsp;2026).
-      Kept: rating ≥ 8.0, price £–£££, minus obvious fine-dining, tasting-menu and
-      special-occasion-only places — this is a casual-eating map. Bold ring =
-      rated 9.0 or higher.</p>
-    </section>
+    <p>It helps you explore different areas and understand which ones might be
+    good places to live.</p>
 
-    <section>
-      <h2>Stations</h2>
-      <p>Every Underground, Elizabeth line, Overground, DLR and rail station in
-      fare Zones 1–2, from the official
-      <a href="https://api.tfl.gov.uk">TfL API</a>. Bold ring = well-connected:
-      three or more lines, an Elizabeth line stop, or a major interchange.</p>
-    </section>
+    <p>All the data is curated, quality-controlled, and comes from trusted
+    sources — you can read exactly how every layer is built on the
+    <a href="methodology.html">methodology page</a>.</p>
 
-    <section>
-      <h2>Good life 🥑</h2>
-      <p>A tongue-in-cheek gentrification index: branches of Waitrose,
-      GAIL's, Aesop and Whole Foods, from their official store finders
-      (Sep&nbsp;2026). Where these cluster, the flat whites are reliable and the
-      rent is not.</p>
-    </section>
+    <p>For coffee, I use data from
+    <a href="https://propercoffee.app/">Proper Coffee</a>. For crime and
+    safety, I use official UK police data (via the
+    <a href="https://data.london.gov.uk/dataset/recorded_crime_summary">London
+    Datastore</a> and <a href="https://data.police.uk/">data.police.uk</a>).
+    I also map places that I personally see as good signs of a nice
+    neighbourhood — Waitrose, GAIL’s, Whole Foods, and a few others.</p>
 
-    <section>
-      <h2>Crime heat</h2>
-      <p>Recorded crime from the Metropolitan Police via the
-      <a href="https://data.london.gov.uk/dataset/recorded_crime_summary">London
-      Datastore</a> (LSOA-level, 12 months to Jul&nbsp;2026). Each small
-      statistical area gets a severity score:</p>
-      <p class="formula">score = 0.7 × violent&nbsp;crime&nbsp;density + 0.3 × theft&nbsp;density</p>
-      <p>where <em>violent crime</em> = violence <strong>with injury</strong> +
-      homicide + personal robbery + residential burglary (threats, harassment and
-      no-injury assault are deliberately excluded — about 74% of the raw "violence"
-      bucket involves no physical harm), and <em>theft</em> = theft from the person
-      + other theft + bicycle theft (no shoplifting). Densities are per km² of each
-      area's true size, each component normalized to its own 95th percentile, and
-      the color ramp saturates at the 99th percentile of the score. Positions are
-      area centroids (<a href="https://geoportal.statistics.gov.uk">ONS</a>), so
-      the surface has ~250&nbsp;m resolution — read it street-corridor by street-corridor,
-      not door by door.</p>
-    </section>
+    <p>The project only covers Zones 1 and 2, simply because that’s where I’m
+    interested in living.</p>
 
-    <p class="disclaimer">
-      Ratings belong to their publishers; crime data © Crown copyright, licensed
-      under the Open Government Licence; map ©
-      <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.
-      Everything here is a personal research notebook, not advice.
-    </p>
+    <p>If your idea of a good place to live is similar to mine — central, a
+    little upscale, close to great places, well connected, and safe — I think
+    you might find this project useful.</p>
+
+    <p>Feel free to use it and share it with anyone.</p>
+
+    <p>The project is open source and released under the
+    <a href="https://github.com/jkee/viktor-in-london/blob/main/LICENSE">MIT
+    licence</a>, so you’re also free to check out the code, copy it, change
+    it, or use it for your own project.</p>
+
+    <p>If you want to get in touch, you can find my contacts
+    <a href="https://github.com/jkee">here</a>. And if you spot a problem or
+    have an idea, feel free to open an issue on
+    <a href="https://github.com/jkee/viktor-in-london">GitHub</a>.</p>
+
+    <p>With love,<br>Victor</p>
 
     <a class="back-link" href="/">← back to the map</a>
+    <a class="back-link" href="methodology.html" style="margin-left:16px">methodology →</a>
   </main>
 </body>
 </html>

@@ -22,7 +22,7 @@ html, body {
 
 /* Mute the base map so the heat colors stand out. */
 .base-tiles {
-  filter: grayscale(0.85) brightness(1.06) contrast(0.96);
+  /* Voyager is already muted; no desaturation needed. */
 }
 
 /* ---------- Panel ---------- */
@@ -230,6 +230,11 @@ html, body {
   .panel.open {
     display: block;
   }
+}
+
+.panel-links {
+  display: flex;
+  gap: 14px;
 }
 
 .about-link {
