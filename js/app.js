@@ -32,10 +32,16 @@ const CONFIG = {
   // Liveability score — constants mirror docs/livability.md (the SSOT).
   // Any change starts in that file.
   livability: {
-    alpha: 0.5,  // opacity at full score; scaled down with S so quiet areas stay clear
-    // Sequential single-hue ramp (pale → deep teal); a diverging red half
-    // read as "unhealthy" when low really just means "less nearby".
-    ramp: { low: [225, 242, 238], high: [15, 118, 110] },
+    // Five display grades over the 0–1 score (0.2-wide bands). Same teal
+    // family throughout, but grades 1–3 stay pale washes while 4–5 jump in
+    // depth and opacity, so the top band reads at a glance.
+    grades: [
+      { min: 0.0, rgb: [214, 237, 233], alpha: 0.10 },
+      { min: 0.2, rgb: [178, 220, 213], alpha: 0.20 },
+      { min: 0.4, rgb: [135, 199, 189], alpha: 0.30 },
+      { min: 0.6, rgb: [26, 138, 126], alpha: 0.50 },
+      { min: 0.8, rgb: [4, 92, 84], alpha: 0.62 }
+    ],
     categories: {
       connectivity: { sigma: 500, k: 2.0, weight: 0.35 },
       coffee:       { sigma: 300, k: 2.5, weight: 0.30 },
@@ -425,8 +431,7 @@ const LivabilityLayer = L.Layer.extend({
     off.height = gh;
     const octx = off.getContext('2d');
     const img = octx.createImageData(gw, gh);
-    const alpha = Math.round(CONFIG.livability.alpha * 255);
-    const { low, high } = CONFIG.livability.ramp;
+    const grades = CONFIG.livability.grades;
     const cats = Object.entries(this._cats);
 
     for (let gy = 0; gy < gh; gy++) {
@@ -437,14 +442,15 @@ const LivabilityLayer = L.Layer.extend({
         for (const [name, cat] of cats) {
           S += cat.cfg.weight * (1 - Math.exp(-grids[name][cell] / cat.cfg.k));
         }
-        const r = Math.round(low[0] + (high[0] - low[0]) * S);
-        const g = Math.round(low[1] + (high[1] - low[1]) * S);
-        const b = Math.round(low[2] + (high[2] - low[2]) * S);
+        let grade = grades[0];
+        for (const g of grades) {
+          if (S >= g.min) grade = g;
+        }
         const i = cell * 4;
-        img.data[i] = r;
-        img.data[i + 1] = g;
-        img.data[i + 2] = b;
-        img.data[i + 3] = Math.round(alpha * (0.15 + 0.85 * Math.pow(S, 0.8)));
+        img.data[i] = grade.rgb[0];
+        img.data[i + 1] = grade.rgb[1];
+        img.data[i + 2] = grade.rgb[2];
+        img.data[i + 3] = Math.round(grade.alpha * 255);
       }
     }
 
