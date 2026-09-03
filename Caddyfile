@@ -1,0 +1,17 @@
+# Production server config (see docs/deployment.md).
+# - www → apex redirect (both domains route to this service)
+# - Cache-Control: no-cache = always revalidate; ETags make that a cheap 304,
+#   and deploys show up immediately instead of fighting heuristic caching.
+:{$PORT:8080} {
+	root * /srv
+	encode zstd gzip
+
+	@www host www.viktor-in-london.uk
+	redir @www https://viktor-in-london.uk{uri} permanent
+
+	@caddyfile path /Caddyfile
+	respond @caddyfile 404
+
+	header Cache-Control "no-cache"
+	file_server
+}

@@ -15,7 +15,9 @@ behind **Cloudflare** DNS.
 
 - Project **london-map** in the "Victor Tarnavsky's Projects" workspace,
   service **london-map**, environment `production`.
-- Build: the `Dockerfile` (Caddy `file-server` on `$PORT`). `.dockerignore`
+- Build: the `Dockerfile` runs Caddy with the repo's `Caddyfile` on `$PORT`
+  (gzip/zstd, `Cache-Control: no-cache` so deploys show up without hard
+  refreshes, and a `www.` → apex permanent redirect). `.dockerignore`
   keeps docs and local config out of the image.
 
 **Deploy** (from the project root, Railway CLI logged in):
@@ -37,7 +39,9 @@ Useful commands: `railway status`, `railway service logs`, `railway open`,
 | TXT | `_railway-verify.www` | `railway-verify=f8a4…` (ownership proof) |
 
 SSL/TLS encryption mode must be **Full (strict)** — "Flexible" causes a
-redirect loop through the Cloudflare proxy.
+redirect loop through the Cloudflare proxy. (As of 2026-09 responses arrive
+with Railway edge headers and no `cf-ray`, i.e. the records look DNS-only /
+unproxied; the SSL-mode note only matters if the orange-cloud proxy is on.)
 
 ## Notes
 
