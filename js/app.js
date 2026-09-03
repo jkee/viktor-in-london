@@ -121,6 +121,7 @@ const DensityLayer = L.Layer.extend({
     if (!this._map) return;
     const map = this._map;
     const size = map.getSize();
+    if (!size.x || !size.y) return;
     L.DomUtil.setPosition(this._canvas, map.containerPointToLayerPoint([0, 0]));
     this._canvas.width = size.x;
     this._canvas.height = size.y;
@@ -198,9 +199,10 @@ const DensityLayer = L.Layer.extend({
 
 const map = L.map('map', { zoomControl: true }).setView(CONFIG.center, CONFIG.zoom);
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  maxZoom: 19,
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 20,
   className: 'base-tiles'
 }).addTo(map);
 
@@ -344,6 +346,7 @@ const LivabilityLayer = L.Layer.extend({
     if (!this._map) return;
     const map = this._map;
     const size = map.getSize();
+    if (!size.x || !size.y) return;
     L.DomUtil.setPosition(this._canvas, map.containerPointToLayerPoint([0, 0]));
     this._canvas.width = size.x;
     this._canvas.height = size.y;
