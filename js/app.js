@@ -368,17 +368,22 @@ const LivabilityLayer = L.Layer.extend({
     const size = map.getSize();
     if (!size.x || !size.y) return;
     L.DomUtil.setPosition(this._canvas, map.containerPointToLayerPoint([0, 0]));
-    this._canvas.width = size.x;
-    this._canvas.height = size.y;
+    // Render at device resolution — band edges are crisp lines, and on
+    // retina a CSS-resolution canvas visibly stair-steps them.
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this._canvas.width = Math.round(size.x * dpr);
+    this._canvas.height = Math.round(size.y * dpr);
+    this._canvas.style.width = size.x + 'px';
+    this._canvas.style.height = size.y + 'px';
     const ctx = this._canvas.getContext('2d');
-    ctx.clearRect(0, 0, size.x, size.y);
+    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
     const metersPerPixel =
       40075016.686 * Math.abs(Math.cos(map.getCenter().lat * Math.PI / 180)) /
       (256 * Math.pow(2, map.getZoom()));
     const step = CONFIG.densitySampleStep;
-    const gw = Math.ceil(size.x / step);
-    const gh = Math.ceil(size.y / step);
+    const gw = Math.ceil(size.x / step) + 1;
+    const gh = Math.ceil(size.y / step) + 1;
 
     // 1. Accumulate raw reachness A_c on one grid per category.
     const grids = {};
@@ -425,67 +430,64 @@ const LivabilityLayer = L.Layer.extend({
       return inside;
     };
 
-    // 3. Blend: S = Σ W_c · (1 − exp(−A_c / k_c)).
-    // Quantizing at grid resolution and upscaling staircases the band edges,
-    // so instead upscale the continuous score field and quantize per screen
-    // pixel. The coarse image encodes S in R and the zone mask in G, with
-    // alpha kept opaque so bilinear interpolation doesn't premultiply the
-    // channels away.
-    const off = document.createElement('canvas');
-    off.width = gw;
-    off.height = gh;
-    const octx = off.getContext('2d');
-    const img = octx.createImageData(gw, gh);
+    // 3. Blend: S = Σ W_c · (1 − exp(−A_c / k_c)) on the coarse grid.
     const cats = Object.entries(this._cats);
-
+    const S = new Float32Array(gw * gh);
+    const M = new Float32Array(gw * gh);  // zone mask, 0 or 1
     for (let gy = 0; gy < gh; gy++) {
       for (let gx = 0; gx < gw; gx++) {
         const cell = gy * gw + gx;
-        let S = 0;
+        let s = 0;
         for (const [name, cat] of cats) {
-          S += cat.cfg.weight * (1 - Math.exp(-grids[name][cell] / cat.cfg.k));
+          s += cat.cfg.weight * (1 - Math.exp(-grids[name][cell] / cat.cfg.k));
         }
-        const i = cell * 4;
-        img.data[i] = Math.round(255 * Math.min(1, S));
-        img.data[i + 1] = inRing(gx + 0.5, gy + 0.5) ? 255 : 0;
-        img.data[i + 3] = 255;
+        S[cell] = s;
+        M[cell] = inRing(gx + 0.5, gy + 0.5) ? 1 : 0;
       }
     }
-    octx.putImageData(img, 0, 0);
 
-    const full = document.createElement('canvas');
-    full.width = size.x;
-    full.height = size.y;
-    const fctx = full.getContext('2d');
-    fctx.imageSmoothingEnabled = true;
-    fctx.imageSmoothingQuality = 'high';
-    fctx.drawImage(off, 0, 0, size.x, size.y);
-
+    // 4. Bilinearly interpolate the float field to device pixels and
+    // quantize there. Quantizing at grid resolution (or via a byte-encoded
+    // canvas upscale, which plateaus where the field is flat) staircases
+    // the band edges; full-precision interpolation keeps them smooth curves.
+    const W = this._canvas.width;
+    const H = this._canvas.height;
     const grades = CONFIG.livability.grades;
-    const lut = new Array(256);
-    for (let v = 0; v < 256; v++) {
-      let grade = grades[0];
-      for (const g of grades) {
-        if (v / 255 >= g.min) grade = g;
-      }
-      lut[v] = grade;
+    const cellsX = new Int32Array(W);
+    const fracsX = new Float32Array(W);
+    for (let x = 0; x < W; x++) {
+      const g = Math.min(Math.max(((x + 0.5) / dpr - step / 2) / step, 0), gw - 1.001);
+      cellsX[x] = Math.floor(g);
+      fracsX[x] = g - Math.floor(g);
     }
-
-    const fimg = fctx.getImageData(0, 0, size.x, size.y);
-    const fd = fimg.data;
-    for (let i = 0; i < fd.length; i += 4) {
-      if (fd[i + 1] < 128) {
-        fd[i + 3] = 0;
-        continue;
+    const out = ctx.createImageData(W, H);
+    const od = out.data;
+    for (let y = 0; y < H; y++) {
+      const g = Math.min(Math.max(((y + 0.5) / dpr - step / 2) / step, 0), gh - 1.001);
+      const gy0 = Math.floor(g) * gw;
+      const gy1 = gy0 + gw;
+      const fy = g - Math.floor(g);
+      for (let x = 0; x < W; x++) {
+        const gx = cellsX[x];
+        const fx = fracsX[x];
+        const w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy);
+        const w01 = (1 - fx) * fy, w11 = fx * fy;
+        const m = M[gy0 + gx] * w00 + M[gy0 + gx + 1] * w10 +
+                  M[gy1 + gx] * w01 + M[gy1 + gx + 1] * w11;
+        if (m < 0.5) continue;
+        const s = S[gy0 + gx] * w00 + S[gy0 + gx + 1] * w10 +
+                  S[gy1 + gx] * w01 + S[gy1 + gx + 1] * w11;
+        let gi = grades.length - 1;
+        while (gi > 0 && s < grades[gi].min) gi--;
+        const grade = grades[gi];
+        const i = (y * W + x) * 4;
+        od[i] = grade.rgb[0];
+        od[i + 1] = grade.rgb[1];
+        od[i + 2] = grade.rgb[2];
+        od[i + 3] = Math.round(grade.alpha * 255);
       }
-      const grade = lut[fd[i]];
-      fd[i] = grade.rgb[0];
-      fd[i + 1] = grade.rgb[1];
-      fd[i + 2] = grade.rgb[2];
-      fd[i + 3] = Math.round(grade.alpha * 255);
     }
-    fctx.putImageData(fimg, 0, 0);
-    ctx.drawImage(full, 0, 0);
+    ctx.putImageData(out, 0, 0);
   }
 });
 
