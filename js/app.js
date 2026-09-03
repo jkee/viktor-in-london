@@ -309,7 +309,7 @@ const stations = L.layerGroup((window.STATIONS || []).map(s => {
   const marker = L.marker([s.lat, s.lng], { icon: badgeIcon('🚇', 'station', Boolean(s.hub)), title: s.name });
   marker.bindPopup(popupHtml(s.name + (s.hub ? ' · hub' : ''), [s.lines]));
   return marker;
-})).addTo(map);
+}));  // off by default — toggled from the panel
 
 /* ============================ Crime density ============================= */
 /* MPS LSOA-level recorded crime, 12 months, combined into one severity
