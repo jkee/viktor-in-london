@@ -3,7 +3,7 @@
  * Layers:
  *   livability — computed liveability score surface (docs/livability.md is SSOT)
  *   notes    — scored walk notes, as colored dots with popups
- *   zone     — the area of interest: dashed outline + dimming outside it
+ *   zone     — the area of interest: light dotted outline (always on)
  *   coffee   — specialty coffee shops (☕ badges; top tier gets a bold ring)
  *   food     — restaurants rated 8.0+ (🍽 badges; 9.0+ gets a bold ring)
  *   stations — tube / rail stations (🚇 badges; hubs get a bold ring)
@@ -34,7 +34,8 @@ const CONFIG = {
   livability: {
     // Five display grades over the 0–1 score (0.2-wide bands). Same teal
     // family throughout, but grades 1–3 stay pale washes while 4–5 jump in
-    // depth and opacity, so the top band reads at a glance.
+    // depth and opacity, so the top band reads at a glance. The panel's
+    // legend gradient (css/style.css .legend-bar) mirrors these colors.
     grades: [
       { min: 0.0, rgb: [214, 237, 233], alpha: 0.10 },
       { min: 0.2, rgb: [178, 220, 213], alpha: 0.20 },
@@ -536,8 +537,10 @@ for (const [id, layer] of Object.entries(toggles)) {
 
 // On small screens the panel is collapsed behind the roundel button.
 const panel = document.getElementById('panel');
-document.getElementById('panel-toggle').addEventListener('click', () => {
-  panel.classList.toggle('open');
+const panelToggle = document.getElementById('panel-toggle');
+panelToggle.addEventListener('click', () => {
+  const open = panel.classList.toggle('open');
+  panelToggle.setAttribute('aria-expanded', String(open));
 });
 
 /* ------------------------- "Show me" (geolocation) ---------------------- */

@@ -112,8 +112,17 @@ html, body {
   color: var(--navy);
 }
 
+/* visually hidden but still focusable, so the toggles work from the keyboard */
 .row input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .sw {
@@ -138,6 +147,11 @@ html, body {
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   transition: transform 0.18s ease;
+}
+
+.row input:focus-visible ~ .sw {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
 }
 
 .row input:checked ~ .sw {
@@ -167,6 +181,7 @@ html, body {
   margin-top: 12px;
 }
 
+/* the five stops mirror CONFIG.livability.grades in js/app.js — keep in sync */
 .legend-bar {
   flex: 1;
   height: 6px;
