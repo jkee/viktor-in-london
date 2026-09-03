@@ -5,20 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Viktor in London</title>
   <meta name="description" content="A personal map of London: where to live, scored by walking around — with the best coffee, food and stations layered on top.">
+  <meta name="theme-color" content="#10069f">
+  <link rel="canonical" href="https://viktor-in-london.uk/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Viktor in London">
+  <meta property="og:title" content="Viktor in London">
+  <meta property="og:description" content="A personal map of London: where to live, scored by walking around — with the best coffee, food and stations layered on top.">
+  <meta property="og:url" content="https://viktor-in-london.uk/">
+  <meta property="og:image" content="https://viktor-in-london.uk/img/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Map of central London with a teal liveability heat map and coffee, food and station badges">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="img/apple-touch-icon.png" type="image/png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
+        integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div id="map"></div>
 
-  <button class="panel-toggle" id="panel-toggle" aria-label="Toggle map controls">
+  <button class="panel-toggle" id="panel-toggle" aria-label="Toggle map controls"
+          aria-expanded="false" aria-controls="panel">
     <svg class="mark mark--small" viewBox="0 0 100 100" aria-hidden="true">
         <circle cx="50" cy="50" r="29.5" fill="none" stroke="#e21b22" stroke-width="14"/>
         <rect x="4.5" y="42.5" width="91" height="15" rx="2.8" fill="#1418a8"/>
@@ -103,8 +119,10 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
-  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js" crossorigin=""></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
+          integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin=""></script>
+  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"
+          integrity="sha384-4CB9Vtol9LN6lGgBCvmPLbUEZwilrqIvPieSRurgAXAB7FVJaLS9n8WyAIA5wjQ+" crossorigin=""></script>
   <script src="data/notes.js"></script>
   <script src="data/zone.js"></script>
   <script src="data/coffee-chains.js"></script>
