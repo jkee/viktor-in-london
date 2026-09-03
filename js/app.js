@@ -425,39 +425,67 @@ const LivabilityLayer = L.Layer.extend({
       return inside;
     };
 
-    // 3. Blend: S = Σ W_c · (1 − exp(−A_c / k_c)), colored on the home ramp.
+    // 3. Blend: S = Σ W_c · (1 − exp(−A_c / k_c)).
+    // Quantizing at grid resolution and upscaling staircases the band edges,
+    // so instead upscale the continuous score field and quantize per screen
+    // pixel. The coarse image encodes S in R and the zone mask in G, with
+    // alpha kept opaque so bilinear interpolation doesn't premultiply the
+    // channels away.
     const off = document.createElement('canvas');
     off.width = gw;
     off.height = gh;
     const octx = off.getContext('2d');
     const img = octx.createImageData(gw, gh);
-    const grades = CONFIG.livability.grades;
     const cats = Object.entries(this._cats);
 
     for (let gy = 0; gy < gh; gy++) {
       for (let gx = 0; gx < gw; gx++) {
-        if (!inRing(gx + 0.5, gy + 0.5)) continue;
         const cell = gy * gw + gx;
         let S = 0;
         for (const [name, cat] of cats) {
           S += cat.cfg.weight * (1 - Math.exp(-grids[name][cell] / cat.cfg.k));
         }
-        let grade = grades[0];
-        for (const g of grades) {
-          if (S >= g.min) grade = g;
-        }
         const i = cell * 4;
-        img.data[i] = grade.rgb[0];
-        img.data[i + 1] = grade.rgb[1];
-        img.data[i + 2] = grade.rgb[2];
-        img.data[i + 3] = Math.round(grade.alpha * 255);
+        img.data[i] = Math.round(255 * Math.min(1, S));
+        img.data[i + 1] = inRing(gx + 0.5, gy + 0.5) ? 255 : 0;
+        img.data[i + 3] = 255;
       }
     }
-
     octx.putImageData(img, 0, 0);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(off, 0, 0, size.x, size.y);
+
+    const full = document.createElement('canvas');
+    full.width = size.x;
+    full.height = size.y;
+    const fctx = full.getContext('2d');
+    fctx.imageSmoothingEnabled = true;
+    fctx.imageSmoothingQuality = 'high';
+    fctx.drawImage(off, 0, 0, size.x, size.y);
+
+    const grades = CONFIG.livability.grades;
+    const lut = new Array(256);
+    for (let v = 0; v < 256; v++) {
+      let grade = grades[0];
+      for (const g of grades) {
+        if (v / 255 >= g.min) grade = g;
+      }
+      lut[v] = grade;
+    }
+
+    const fimg = fctx.getImageData(0, 0, size.x, size.y);
+    const fd = fimg.data;
+    for (let i = 0; i < fd.length; i += 4) {
+      if (fd[i + 1] < 128) {
+        fd[i + 3] = 0;
+        continue;
+      }
+      const grade = lut[fd[i]];
+      fd[i] = grade.rgb[0];
+      fd[i + 1] = grade.rgb[1];
+      fd[i + 2] = grade.rgb[2];
+      fd[i + 3] = Math.round(grade.alpha * 255);
+    }
+    fctx.putImageData(fimg, 0, 0);
+    ctx.drawImage(full, 0, 0);
   }
 });
 
