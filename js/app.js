@@ -23,7 +23,7 @@ const CONFIG = {
   scoreMin: -5,
   scoreMax: 5,
   densitySampleStep: 4,  // px between canvas heat samples (higher = faster, blurrier)
-  // Diverging color ramp (RdYlGn): scoreMin → neutral → scoreMax
+  // Diverging color ramp (RdYlGn) for walk-note badges: scoreMin → neutral → scoreMax
   ramp: [
     [215, 48, 39],
     [254, 224, 139],
@@ -32,7 +32,10 @@ const CONFIG = {
   // Liveability score — constants mirror docs/livability.md (the SSOT).
   // Any change starts in that file.
   livability: {
-    alpha: 0.28,
+    alpha: 0.5,  // opacity at full score; scaled down with S so quiet areas stay clear
+    // Sequential single-hue ramp (pale → deep teal); a diverging red half
+    // read as "unhealthy" when low really just means "less nearby".
+    ramp: { low: [225, 242, 238], high: [15, 118, 110] },
     categories: {
       connectivity: { sigma: 500, k: 2.0, weight: 0.35 },
       coffee:       { sigma: 300, k: 2.5, weight: 0.30 },
@@ -308,7 +311,7 @@ const stations = L.layerGroup((window.STATIONS || []).map(s => {
 
 const crime = window.CRIME || { combined: [], combinedRef: 1 };
 
-// Violet ramp — deliberately distinct from the red/green liveability ramp
+// Violet ramp — deliberately distinct from the teal liveability ramp
 // so both layers stay readable when shown together.
 const crimeHeat = new DensityLayer(crime.combined, crime.combinedRef, {
   low: [238, 226, 254],
@@ -423,6 +426,7 @@ const LivabilityLayer = L.Layer.extend({
     const octx = off.getContext('2d');
     const img = octx.createImageData(gw, gh);
     const alpha = Math.round(CONFIG.livability.alpha * 255);
+    const { low, high } = CONFIG.livability.ramp;
     const cats = Object.entries(this._cats);
 
     for (let gy = 0; gy < gh; gy++) {
@@ -433,12 +437,14 @@ const LivabilityLayer = L.Layer.extend({
         for (const [name, cat] of cats) {
           S += cat.cfg.weight * (1 - Math.exp(-grids[name][cell] / cat.cfg.k));
         }
-        const [r, g, b] = rampColor(S);
+        const r = Math.round(low[0] + (high[0] - low[0]) * S);
+        const g = Math.round(low[1] + (high[1] - low[1]) * S);
+        const b = Math.round(low[2] + (high[2] - low[2]) * S);
         const i = cell * 4;
         img.data[i] = r;
         img.data[i + 1] = g;
         img.data[i + 2] = b;
-        img.data[i + 3] = alpha;
+        img.data[i + 3] = Math.round(alpha * (0.15 + 0.85 * Math.pow(S, 0.8)));
       }
     }
 

@@ -172,9 +172,8 @@ html, body {
   height: 6px;
   border-radius: 3px;
   background: linear-gradient(to right,
-    rgb(215, 48, 39),
-    rgb(254, 224, 139),
-    rgb(26, 152, 80));
+    rgb(225, 242, 238),
+    rgb(15, 118, 110));
 }
 
 .legend-label {
