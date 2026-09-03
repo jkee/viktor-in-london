@@ -270,7 +270,7 @@ const noteMarkers = L.layerGroup(notes.map(n => {
   const label = n.score > 0 ? `+${n.score}` : `${n.score}`;
   marker.bindPopup(popupHtml(`Score: ${label}`, [n.note], n.date));
   return marker;
-})).addTo(map);
+}));  // off by default — toggled from the panel
 
 /* =============================== Coffee ================================= */
 /* window.COFFEE is filled by data/coffee-chains.js + data/coffee-independents.js.
