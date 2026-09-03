@@ -32,7 +32,7 @@ const CONFIG = {
   // Liveability score — constants mirror docs/livability.md (the SSOT).
   // Any change starts in that file.
   livability: {
-    alpha: 0.44,
+    alpha: 0.28,
     categories: {
       connectivity: { sigma: 500, k: 2.0, weight: 0.35 },
       coffee:       { sigma: 300, k: 2.5, weight: 0.30 },
@@ -207,25 +207,19 @@ L.maplibreGL({
 L.control.scale({ position: 'bottomleft', metric: true, imperial: false, maxWidth: 140 }).addTo(map);
 
 /* ============================ Interest zone ============================= */
-/* Dashed outline + a world-sized polygon with the zone as a hole, which
- * dims everything outside. Always on (no toggle). */
+/* Soft dotted outline. Always on (no toggle). */
 
 const zoneRing = window.ZONE || [];
 const zone = L.layerGroup();
 
 if (zoneRing.length >= 3) {
-  const world = [[-85, -180], [-85, 180], [85, 180], [85, -180]];
-  L.polygon([world, zoneRing], {
-    stroke: false,
-    fillColor: '#1a1a2e',
-    fillOpacity: 0.18,
-    interactive: false
-  }).addTo(zone);
-
   L.polygon(zoneRing, {
     color: '#3b5bdb',
+    opacity: 0.55,
     weight: 2.5,
-    dashArray: '8 6',
+    dashArray: '0.5 9',
+    lineCap: 'round',
+    lineJoin: 'round',
     fill: false,
     interactive: false
   }).addTo(zone);
