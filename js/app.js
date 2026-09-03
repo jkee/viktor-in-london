@@ -199,11 +199,9 @@ const DensityLayer = L.Layer.extend({
 
 const map = L.map('map', { zoomControl: true }).setView(CONFIG.center, CONFIG.zoom);
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  subdomains: 'abcd',
-  maxZoom: 20,
-  className: 'base-tiles'
+L.maplibreGL({
+  style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
 }).addTo(map);
 
 L.control.scale({ position: 'bottomleft', metric: true, imperial: false, maxWidth: 140 }).addTo(map);
@@ -234,8 +232,27 @@ if (zoneRing.length >= 3) {
 }
 
 zone.addTo(map);
-if (zoneRing.length >= 3) {
-  map.fitBounds(L.latLngBounds(zoneRing).pad(0.12));
+
+function fitZone() {
+  if (zoneRing.length >= 3) {
+    map.fitBounds(L.latLngBounds(zoneRing).pad(0.12));
+  }
+}
+fitZone();
+
+/* If the page loads while #map has no layout size (hidden tab, embedded
+ * webview), Leaflet caches the 0×0 size and fitBounds lands on zoom 0 with
+ * no resize event to recover. Re-measure and re-fit once real size arrives. */
+{
+  const mapEl = document.getElementById('map');
+  let awaitingSize = mapEl.clientWidth === 0 || mapEl.clientHeight === 0;
+  new ResizeObserver(() => {
+    map.invalidateSize({ animate: false });
+    if (awaitingSize && mapEl.clientWidth > 0 && mapEl.clientHeight > 0) {
+      awaitingSize = false;
+      fitZone();
+    }
+  }).observe(mapEl);
 }
 
 /* ============================= Walk notes =============================== */

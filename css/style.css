@@ -20,11 +20,6 @@ html, body {
   background: #e8e8e4;
 }
 
-/* Mute the base map so the heat colors stand out. */
-.base-tiles {
-  /* Voyager is already muted; no desaturation needed. */
-}
-
 /* ---------- Panel ---------- */
 
 .panel {
