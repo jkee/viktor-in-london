@@ -87,3 +87,10 @@ railway up --detach --service london-map
 ```
 
 Details, domains and DNS in [docs/deployment.md](docs/deployment.md).
+
+## License
+
+[MIT](LICENSE). The reference data keeps its original terms: ratings belong
+to their publishers (propercoffee.app, The Infatuation), crime data is
+© Crown copyright under the Open Government Licence, station data © TfL,
+map tiles © OpenStreetMap contributors.
