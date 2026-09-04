@@ -111,17 +111,29 @@
       <a href="https://github.com/jkee/london-newbuilds">london-newbuilds</a>,
       which swept planning records, property portals, architecture directories
       and ~40 developer portfolios across Zones 1–2 into a catalog of 1,422
-      developments backed by claim-level evidence. The map shows only its
-      <strong>"B — investigate"</strong> lane: 531 manually reviewed candidates
-      that look credible (upscale, architecturally significant, or a genuine
-      conversion) and fall inside the dotted area. Not shown: reviewed holds and
-      exclusions, and the unreviewed discovery pipeline.</p>
-      <p>A navy dot means <em>worth a look</em>, not <em>good</em> — the
-      research deliberately rates no building "great" until comfort, operations
-      and fire-safety evidence is verified, and none has cleared that bar yet.
-      Each popup carries the catalog id; the full record, classification
-      reasoning and evidence trail live in the research repo (frozen release
-      <code>zone-1-2-v1</code>, regenerated here by
+      developments backed by claim-level evidence. Inside the dotted area the
+      map shows three reviewed tiers:</p>
+      <p><strong>🏢 B — investigate</strong> (531): credible candidates —
+      upscale, architecturally significant, or a genuine conversion. A navy
+      badge means <em>worth a look</em>, not <em>good</em>: the research rates
+      no building "great" until comfort, operations and fire-safety evidence is
+      verified, and none has cleared that bar yet. Each popup lists the open
+      due-diligence gates as "Verify: …" tags (heating, cooling, acoustics,
+      external walls, …) plus the catalog's known-issues note.</p>
+      <p><strong>🏗 C — probably-ok holds</strong> (58): mostly schemes not yet
+      delivered (dashed badge, "Future"), plus a few with unresolved safety
+      status (amber badge — check the current FRAEW/EWS1 position).</p>
+      <p><strong>C — probably-bad holds</strong> (39, greyed out): buildings
+      with resident-reported operational failures or a confirmed fire-safety
+      defect on record. They stay on the map because they're often famous and
+      attractive-looking — the flag explains specifically why to be careful.</p>
+      <p>Tags name the thing to check rather than pass a verdict, and each
+      popup is dated — safety and operations claims go stale, so recheck close
+      to any decision. Not shown at all: reviewed holds that are simply not
+      relevant to this hunt (affordable/student product, serviced stays,
+      ordinary stock) and the unreviewed discovery pipeline. Each popup carries
+      the catalog id; the full record, classification reasoning and evidence
+      trail live in the research repo (pinned commit, regenerated here by
       <code>scripts/build-newbuilds.py</code>).</p>
     </section>
 

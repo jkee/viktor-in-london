@@ -103,23 +103,29 @@ From the standalone research project
 **[jkee/london-newbuilds](https://github.com/jkee/london-newbuilds)** — a
 1,422-development catalog of Zone 1–2 new-builds and major conversions with
 claim-level evidence, built from planning records, portals, architecture
-directories and ~40 developer portfolio audits. The map consumes only its
-frozen, checksummed release (git tag **`zone-1-2-v1`**, 2026-09-04).
+directories and ~40 developer portfolio audits.
 
-`scripts/build-newbuilds.py` downloads `outputs/zone-1-2-catalog-v1.csv` from
-that tag, verifies its SHA-256 against `v1-manifest.json`, and keeps records
-that are **quality-gate reviewed**, lane **B — investigate**, with coordinates
+`scripts/build-newbuilds.py` downloads `data/catalog/developments.csv` and
+`outputs/promotion-gap-register.csv` from a **pinned commit** (immutable SHA,
+`REF` in the script) and keeps quality-gate-reviewed records with coordinates
 inside the `zone.js` ring (no buffer — these are homes, not amenities):
-531 of 1,422. Only neutral facts are emitted (name, coords, year, type,
-developer, homes, first postcode, catalog id); classification reasons, safety
-notes and the evidence trail deliberately stay upstream — look the id up there.
-Each record also carries `url` — the development's representative page
-(`primary_url`, a post-v1 additive catalog column joined by id from the pinned
-commit in the script) — used as the popup-title link.
 
-To refresh: bump `TAG` in the script when the research project cuts a new
-release, then rerun `python3 scripts/build-newbuilds.py`. For private local
-use, `--lanes B,C` adds the 260 reviewed holds/exclusions; don't commit that.
+- all **B — investigate** records (531), each with its open due-diligence
+  gates (`verify`, from the promotion-gap register's `open_gates`) and the
+  catalog's `known_issues` note;
+- **C holds** triaged `probably-ok` (58 — mostly `not-yet-delivered` future
+  schemes) or `probably-bad` (39 — `operational-failure` /
+  `safety-defect-confirmed`), rendered demoted with specific warnings;
+- dropped: `not-applicable` C holds (product-fit/ordinary/context noise) and
+  the 509-record unreviewed pipeline, which must not read as recommendations.
+
+Each record carries `url` (the development's representative `primary_url`
+page, used as the popup-title link) and `asof` (last review date — safety and
+operations notes go stale). Framing rules from the research project apply:
+tags name the thing to check, not a verdict, and are time-stamped.
+
+To refresh after new research commits: bump `REF` in the script, rerun
+`python3 scripts/build-newbuilds.py`, sanity-check the counts it prints.
 
 ## stations.js — tube / rail stations
 

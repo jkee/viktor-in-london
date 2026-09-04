@@ -1,25 +1,28 @@
 #!/usr/bin/env python3
-"""Regenerate data/newbuilds.js from the london-newbuilds research release.
+"""Regenerate data/newbuilds.js from the london-newbuilds research catalog.
 
-Fetches the frozen, checksummed catalog from the pinned release tag of
-https://github.com/jkee/london-newbuilds, verifies it against the release
-manifest, filters it down to the map's scope, and writes data/newbuilds.js.
+Fetches the research catalog and the promotion-gap register from a pinned
+commit of https://github.com/jkee/london-newbuilds (an immutable SHA, so the
+build stays reproducible), filters to the map's scope, and writes
+data/newbuilds.js.
 
-Filter (the public default):
-  - review_status == "quality-gate"  (drops the unreviewed discovery pipeline)
-  - classification == "B"            (reviewed "investigate" lane; --lanes B,C
-                                      adds the reviewed holds for local use)
-  - has coordinates, inside the interest-zone ring from data/zone.js
+What is kept (all quality-gate reviewed, with coordinates, inside the
+interest-zone ring from data/zone.js):
+  - all "B — investigate" records, each carrying its open due-diligence
+    gates ("verify before committing" tags) and known-issues note;
+  - "C — hold" records whose hold_verdict is probably-ok (mostly future,
+    not-yet-delivered schemes) or probably-bad (operational failures and
+    confirmed safety defects — shown demoted with a specific warning);
+  - dropped: not-applicable C holds (product-fit/ordinary/context noise for
+    a premium-flat hunt) and the unreviewed discovery pipeline.
 
-Only neutral facts are emitted (name, coords, year, type, developer, homes,
-postcode, catalog id). The research project's judgment prose, safety columns
-and evidence trail stay upstream — follow the id there for the full record.
+Tags name the thing to check, not a verdict, and safety/operations notes are
+time-stamped (asof) — both per the research project's own framing rules.
 
 Usage:
-  python3 scripts/build-newbuilds.py [--lanes B,C]
+  python3 scripts/build-newbuilds.py
 """
 
-import argparse
 import csv
 import hashlib
 import io
@@ -30,24 +33,22 @@ import urllib.request
 from pathlib import Path
 
 REPO = "jkee/london-newbuilds"
-TAG = "zone-1-2-v1"
-CATALOG_FILE = "zone-1-2-catalog-v1.csv"
-RAW_BASE = f"https://raw.githubusercontent.com/{REPO}/{TAG}/outputs"
-
-# primary_url is a post-v1 additive column: it lives in the live catalog, not
-# the frozen release, so it is joined in by development_id from this pinned
-# commit ("Add representative primary_url per development").
-URL_REF = "ede424a1f14b409b0b6503862ef259029bf5c841"
-URL_CATALOG = f"https://raw.githubusercontent.com/{REPO}/{URL_REF}/data/catalog/developments.csv"
+# "Triage the reviewed C hold lane into buckets and verdicts" — the first
+# commit carrying hold_bucket/hold_verdict, primary_url and the refreshed
+# promotion-gap register together.
+REF = "5c0da2a2aad2595a594d88afe251e4c4e53bcde7"
+RAW_BASE = f"https://raw.githubusercontent.com/{REPO}/{REF}"
+CATALOG = f"{RAW_BASE}/data/catalog/developments.csv"
+GAP_REGISTER = f"{RAW_BASE}/outputs/promotion-gap-register.csv"
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = ROOT / "data" / "newbuilds.js"
 ZONE_PATH = ROOT / "data" / "zone.js"
 
 
-def fetch(url: str) -> bytes:
+def fetch_csv(url: str) -> list[dict]:
     with urllib.request.urlopen(url) as resp:
-        return resp.read()
+        return list(csv.DictReader(io.StringIO(resp.read().decode("utf-8"))))
 
 
 def load_zone_ring() -> list[tuple[float, float]]:
@@ -74,41 +75,30 @@ def inside(ring: list[tuple[float, float]], lat: float, lng: float) -> bool:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--lanes", default="B",
-                        help="comma-separated classifications to keep (default: B)")
-    lanes = {lane.strip().upper() for lane in parser.parse_args().lanes.split(",")}
-
-    manifest = json.loads(fetch(f"{RAW_BASE}/v1-manifest.json"))
-    raw = fetch(f"{RAW_BASE}/{CATALOG_FILE}")
-    expected = manifest["files"][CATALOG_FILE]["sha256"]
-    actual = hashlib.sha256(raw).hexdigest()
-    if actual != expected:
-        sys.exit(f"checksum mismatch for {CATALOG_FILE}: expected {expected}, got {actual}")
-
-    urls = {
-        row["development_id"]: row["primary_url"].strip()
-        for row in csv.DictReader(io.StringIO(fetch(URL_CATALOG).decode("utf-8")))
+    rows = fetch_csv(CATALOG)
+    gates = {
+        row["development_id"]: [g for g in row["open_gates"].split("|") if g]
+        for row in fetch_csv(GAP_REGISTER)
     }
-
     ring = load_zone_ring()
-    rows = list(csv.DictReader(io.StringIO(raw.decode("utf-8"))))
 
     kept = []
     for row in rows:
         if row["review_status"] != "quality-gate":
             continue
-        if row["classification"] not in lanes:
+        lane = row["classification"]
+        verdict = row["hold_verdict"]
+        if lane == "C" and verdict not in ("probably-ok", "probably-bad"):
             continue
         if not row["latitude"] or not row["longitude"]:
             continue
         lat, lng = float(row["latitude"]), float(row["longitude"])
         if not inside(ring, lat, lng):
             continue
-        kept.append({
+        rec = {
             "id": row["development_id"],
             "name": row["canonical_name"],
-            "lane": row["classification"],
+            "lane": lane,
             "lat": round(lat, 5),
             "lng": round(lng, 5),
             "year": row["effective_year"].strip(),
@@ -116,9 +106,23 @@ def main() -> None:
             "developer": row["developer"].strip(),
             "homes": row["homes"].strip(),
             "postcode": re.split(r"[|;,]", row["postcodes"])[0].strip(),
-            "url": urls.get(row["development_id"], ""),
-        })
+            "url": row["primary_url"].strip(),
+            "note": row["known_issues"].strip(),
+            "asof": row["last_reviewed"].strip(),
+        }
+        if lane == "B":
+            rec["verify"] = gates.get(rec["id"], [])
+        else:
+            rec["verdict"] = verdict.removeprefix("probably-")
+            rec["bucket"] = row["hold_bucket"]
+        kept.append(rec)
     kept.sort(key=lambda r: r["name"].lower())
+
+    counts = {
+        "B": sum(1 for r in kept if r["lane"] == "B"),
+        "C ok": sum(1 for r in kept if r.get("verdict") == "ok"),
+        "C bad": sum(1 for r in kept if r.get("verdict") == "bad"),
+    }
 
     def js(row: dict) -> str:
         fields = ", ".join(
@@ -127,24 +131,29 @@ def main() -> None:
         return f"  {{ {fields} }},"
 
     header = f"""\
-// New-build / major-conversion developments — reviewed candidates from the
+// New-build / major-conversion developments — reviewed records from the
 // london-newbuilds research project (https://github.com/{REPO}).
 //
 // GENERATED by scripts/build-newbuilds.py — do not edit by hand.
-// Source: release {TAG} ({manifest["release_id"]}), outputs/{CATALOG_FILE},
-// verified against v1-manifest.json (sha256).
-// Filter: quality-gate reviewed, lane(s) {"+".join(sorted(lanes))}, inside the
-// data/zone.js interest ring. {len(kept)} of {len(rows)} catalog records kept.
-// url is each development's representative page (primary_url, joined by id
-// from the catalog at commit {URL_REF[:7]} — a post-v1 additive column).
-// Fields are neutral facts only; classification reasons, safety notes and the
-// claim-level evidence trail live in the research repo — look up the id there.
-// lane: "B" = reviewed, worth investigating; "C" = reviewed hold/exclusion.
+// Source: data/catalog/developments.csv + outputs/promotion-gap-register.csv
+// at pinned commit {REF[:7]}.
+// Kept: quality-gate reviewed, inside the data/zone.js interest ring —
+// {counts["B"]} B-investigate, {counts["C ok"]} C probably-ok holds (mostly future schemes),
+// {counts["C bad"]} C probably-bad holds (shown demoted, with specific warnings).
+// Dropped: not-applicable C holds and the unreviewed discovery pipeline.
+//
+// lane "B": verify = open due-diligence gates (check before committing),
+//   note = known-issues text from the catalog, asof = last review date.
+// lane "C": verdict = "ok" | "bad", bucket = hold reason
+//   (not-yet-delivered / safety-unresolved / identity-evidence-gap /
+//   operational-failure / safety-defect-confirmed), note + asof as above.
+// The full claim-level evidence trail lives in the research repo — look up
+// the id there.
 
 window.NEWBUILDS = [
 """
     OUT_PATH.write_text(header + "\n".join(js(row) for row in kept) + "\n];\n")
-    print(f"wrote {OUT_PATH} — {len(kept)} records (lanes: {', '.join(sorted(lanes))})")
+    print(f"wrote {OUT_PATH} — {len(kept)} records ({counts})")
 
 
 if __name__ == "__main__":
