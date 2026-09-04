@@ -113,6 +113,9 @@ inside the `zone.js` ring (no buffer — these are homes, not amenities):
 531 of 1,422. Only neutral facts are emitted (name, coords, year, type,
 developer, homes, first postcode, catalog id); classification reasons, safety
 notes and the evidence trail deliberately stay upstream — look the id up there.
+Each record also carries `url` — the development's representative page
+(`primary_url`, a post-v1 additive catalog column joined by id from the pinned
+commit in the script) — used as the popup-title link.
 
 To refresh: bump `TAG` in the script when the research project cuts a new
 release, then rerun `python3 scripts/build-newbuilds.py`. For private local

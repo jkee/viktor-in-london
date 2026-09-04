@@ -89,11 +89,15 @@ function badgeIcon(emoji, variant, bold) {
   });
 }
 
-/** Standard popup: bold title, optional detail lines, optional muted footnote. */
-function popupHtml(title, lines, footnote) {
+/** Standard popup: bold title, optional detail lines, optional muted footnote.
+ * With `titleHref` the title becomes an external link. */
+function popupHtml(title, lines, footnote, titleHref) {
+  const titleHtml = titleHref
+    ? `<a href="${escapeHtml(titleHref)}" target="_blank" rel="noopener">${escapeHtml(title)} ↗</a>`
+    : escapeHtml(title);
   return (
     '<div class="note-popup">' +
-    `<div class="score">${escapeHtml(title)}</div>` +
+    `<div class="score">${titleHtml}</div>` +
     lines.filter(Boolean).map(l => `<div>${escapeHtml(l)}</div>`).join('') +
     (footnote ? `<div class="date">${escapeHtml(footnote)}</div>` : '') +
     '</div>'
@@ -352,7 +356,8 @@ const newbuilds = L.layerGroup((window.NEWBUILDS || []).map(d => {
       [d.developer, d.year].filter(Boolean).join(' · '),
       [d.homes, d.postcode].filter(Boolean).join(' · ')
     ],
-    `B — investigate · ${d.id}`
+    `B — investigate · ${d.id}`,
+    d.url
   ));
   return marker;
 }));  // off by default — toggled from the panel

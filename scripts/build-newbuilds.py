@@ -34,6 +34,12 @@ TAG = "zone-1-2-v1"
 CATALOG_FILE = "zone-1-2-catalog-v1.csv"
 RAW_BASE = f"https://raw.githubusercontent.com/{REPO}/{TAG}/outputs"
 
+# primary_url is a post-v1 additive column: it lives in the live catalog, not
+# the frozen release, so it is joined in by development_id from this pinned
+# commit ("Add representative primary_url per development").
+URL_REF = "ede424a1f14b409b0b6503862ef259029bf5c841"
+URL_CATALOG = f"https://raw.githubusercontent.com/{REPO}/{URL_REF}/data/catalog/developments.csv"
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = ROOT / "data" / "newbuilds.js"
 ZONE_PATH = ROOT / "data" / "zone.js"
@@ -80,6 +86,11 @@ def main() -> None:
     if actual != expected:
         sys.exit(f"checksum mismatch for {CATALOG_FILE}: expected {expected}, got {actual}")
 
+    urls = {
+        row["development_id"]: row["primary_url"].strip()
+        for row in csv.DictReader(io.StringIO(fetch(URL_CATALOG).decode("utf-8")))
+    }
+
     ring = load_zone_ring()
     rows = list(csv.DictReader(io.StringIO(raw.decode("utf-8"))))
 
@@ -105,6 +116,7 @@ def main() -> None:
             "developer": row["developer"].strip(),
             "homes": row["homes"].strip(),
             "postcode": re.split(r"[|;,]", row["postcodes"])[0].strip(),
+            "url": urls.get(row["development_id"], ""),
         })
     kept.sort(key=lambda r: r["name"].lower())
 
@@ -123,6 +135,8 @@ def main() -> None:
 // verified against v1-manifest.json (sha256).
 // Filter: quality-gate reviewed, lane(s) {"+".join(sorted(lanes))}, inside the
 // data/zone.js interest ring. {len(kept)} of {len(rows)} catalog records kept.
+// url is each development's representative page (primary_url, joined by id
+// from the catalog at commit {URL_REF[:7]} — a post-v1 additive column).
 // Fields are neutral facts only; classification reasons, safety notes and the
 // claim-level evidence trail live in the research repo — look up the id there.
 // lane: "B" = reviewed, worth investigating; "C" = reviewed hold/exclusion.
