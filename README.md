@@ -10,7 +10,9 @@ heat surface in five teal grades (the deeper the wash, the more liveable)
 blending connectivity, coffee, food and daily-life amenities — methodology in
 [docs/livability.md](docs/livability.md). Around them sit reference layers —
 specialty coffee, casual restaurants rated 8.0+, stations, "good life" chains,
-and a violet crime-severity overlay — all scoped to roughly TfL Zones 1–2.
+a violet crime-severity overlay, and reviewed new-build candidates from the
+[london-newbuilds](https://github.com/jkee/london-newbuilds) research project —
+all scoped to roughly TfL Zones 1–2.
 
 ## Running locally
 
@@ -42,6 +44,9 @@ data/
   stations.js                 tube/rail stations              → window.STATIONS
   wealth.js                   "good life" chain markers       → window.WEALTH
   crime.js                    crime density per LSOA          → window.CRIME
+  newbuilds.js                reviewed new-build candidates   → window.NEWBUILDS
+scripts/
+  build-newbuilds.py          regenerates newbuilds.js from the research release
 img/
   apple-touch-icon.png        the VIKTOR roundel (favicon / home-screen icon)
   og-image.jpg                link-preview card for social shares
@@ -73,6 +78,11 @@ are (re)generated — see `docs/data-sources.md`.
 **Add a cafe / restaurant / station** — append to the matching file; the field
 schemas are documented in each file's header comment. Top-tier flags
 (`tier: "★★★ …"`, `rating >= 9`, `hub: true`) give a marker the bold ring.
+
+**Refresh the new-builds layer** — `data/newbuilds.js` is generated, not
+hand-edited: `python3 scripts/build-newbuilds.py` rebuilds it from the pinned
+release of [london-newbuilds](https://github.com/jkee/london-newbuilds)
+(see `docs/data-sources.md`).
 
 ## Design notes
 
