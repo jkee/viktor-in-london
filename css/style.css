@@ -93,6 +93,20 @@ html, body {
   letter-spacing: -0.01em;
 }
 
+/* tiny uppercase pill for layers still in beta */
+.beta {
+  font-size: 8.5px;
+  font-weight: 700;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #dc241f;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.5px 5px 1px;
+  vertical-align: 1.5px;
+}
+
 /* small cursive source tag next to a layer name */
 .src {
   font-size: 10px;
