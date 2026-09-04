@@ -447,6 +447,8 @@ html, body {
 
 .badge--wealth { border: 1px solid #74a12e; background: #f7fbe8; }
 
+.badge--newbuilds { border: 1px solid var(--navy); background: #eef0ff; }
+
 /* ---------- Leaflet chrome ---------- */
 
 .leaflet-container {
