@@ -277,6 +277,18 @@ html, body {
   color: var(--navy);
 }
 
+.gh-link {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.gh-link:hover {
+  color: var(--navy);
+}
+
 /* ---------- About page ---------- */
 
 .about-page {
