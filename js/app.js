@@ -8,7 +8,8 @@
  *   food     — restaurants rated 8.0+ (🍽 badges; 9.0+ gets a bold ring)
  *   stations — tube / rail stations (🚇 badges; hubs get a bold ring)
  *   wealth   — "good life" district signals (🥑: Waitrose, GAIL's, Aesop, Whole Foods)
- *   newbuilds — reviewed new-build/conversion candidates (🏢 badges)
+ *   newbuilds — reviewed new-build/conversion candidates (🏢 badges),
+ *               with a "warehouse conversions only" sub-filter
  *   crime    — combined crime severity density (violet surface)
  *
  * All data lives in data/*.js as plain window globals (see README.md).
@@ -384,7 +385,7 @@ function newbuildBadgeAndTag(d) {
   }
 }
 
-const newbuilds = L.layerGroup((window.NEWBUILDS || []).map(d => {
+const newbuildMarkers = (window.NEWBUILDS || []).map(d => {
   const { emoji, variant, status, tag } = newbuildBadgeAndTag(d);
   const marker = L.marker([d.lat, d.lng], { icon: badgeIcon(emoji, variant, false), title: d.name });
   marker.bindPopup(popupHtml(
@@ -399,8 +400,19 @@ const newbuilds = L.layerGroup((window.NEWBUILDS || []).map(d => {
     `${status} · ${d.id}` + (d.asof ? ` · as of ${d.asof}` : ''),
     d.url
   ), { maxHeight: 280 });
+  marker.warehouse = Boolean(d.warehouse);
   return marker;
-}));  // off by default — toggled from the panel
+});
+const newbuilds = L.layerGroup(newbuildMarkers);  // off by default — toggled from the panel
+
+// "Warehouse conversions only" sub-filter: converted warehouses / factories /
+// printworks / breweries (flag derived in scripts/build-newbuilds.py).
+function filterNewbuilds(warehouseOnly) {
+  newbuilds.clearLayers();
+  for (const m of newbuildMarkers) {
+    if (!warehouseOnly || m.warehouse) newbuilds.addLayer(m);
+  }
+}
 
 
 /* ===================== Liveability score (heat map) ===================== */
@@ -601,6 +613,15 @@ for (const [id, layer] of Object.entries(toggles)) {
     else map.removeLayer(layer);
   });
 }
+
+// The warehouse filter row only shows while the New-builds layer is on.
+const warehouseRow = document.getElementById('row-warehouse');
+document.getElementById('toggle-newbuilds').addEventListener('change', e => {
+  warehouseRow.hidden = !e.target.checked;
+});
+document.getElementById('toggle-warehouse').addEventListener('change', e => {
+  filterNewbuilds(e.target.checked);
+});
 
 // On small screens the panel is collapsed behind the roundel button.
 const panel = document.getElementById('panel');

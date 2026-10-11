@@ -124,6 +124,14 @@ page, used as the popup-title link) and `asof` (last review date — safety and
 operations notes go stale). Framing rules from the research project apply:
 tags name the thing to check, not a verdict, and are time-stamped.
 
+`warehouse: true` marks converted warehouses / factories / printworks /
+breweries (37 records) and drives the panel's "Warehouse conversions only"
+filter. The catalog has no such field, so the script derives it from the
+free-text `development_type` — an industrial-building word *and* a
+conversion word, so new-builds on industrial sites and loft-styled new
+blocks stay out — plus small `WAREHOUSE_INCLUDE` / `WAREHOUSE_EXCLUDE`
+override sets. Re-check those overrides when bumping `REF`.
+
 To refresh after new research commits: bump `REF` in the script, rerun
 `python3 scripts/build-newbuilds.py`, sanity-check the counts it prints.
 

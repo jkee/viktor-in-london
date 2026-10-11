@@ -16,6 +16,13 @@ interest-zone ring from data/zone.js):
   - dropped: not-applicable C holds (product-fit/ordinary/context noise for
     a premium-flat hunt) and the unreviewed discovery pipeline.
 
+Records whose building is a converted warehouse / factory / printworks /
+brewery (industrial loft stock) get `warehouse: true`. The catalog has no
+such field, so it is derived from the free-text development_type (an
+industrial building word plus a conversion word), with hand overrides for
+masterplans that merely contain a conversion and for types worded without
+the keywords — see WAREHOUSE_*.
+
 Tags name the thing to check, not a verdict, and safety/operations notes are
 time-stamped (asof) — both per the research project's own framing rules.
 
@@ -40,6 +47,31 @@ REF = "5c0da2a2aad2595a594d88afe251e4c4e53bcde7"
 RAW_BASE = f"https://raw.githubusercontent.com/{REPO}/{REF}"
 CATALOG = f"{RAW_BASE}/data/catalog/developments.csv"
 GAP_REGISTER = f"{RAW_BASE}/outputs/promotion-gap-register.csv"
+
+# Warehouse-conversion flag: an industrial building that was converted, not
+# new-build on an industrial site or a loft-styled new block.
+WAREHOUSE_BUILDING = re.compile(
+    r"warehouse|factor(?:y|ies)|printworks|brewery|brewhouse|\bmill\b|"
+    r"industrial|foundry|granary|tannery",
+    re.I,
+)
+WAREHOUSE_CONVERTED = re.compile(r"conver|refurbish|-to-loft|restoration", re.I)
+WAREHOUSE_INCLUDE = {
+    "paynes-borthwick-wharf",  # listed riverside warehouses ("listed-wharf restoration")
+}
+WAREHOUSE_EXCLUDE = {
+    "london-square-bermondsey",  # masterplan; its Pickle Factory is its own record
+}
+
+
+def is_warehouse(row: dict) -> bool:
+    dev_id, kind = row["development_id"], row["development_type"]
+    if dev_id in WAREHOUSE_INCLUDE:
+        return True
+    if dev_id in WAREHOUSE_EXCLUDE:
+        return False
+    return bool(WAREHOUSE_BUILDING.search(kind) and WAREHOUSE_CONVERTED.search(kind))
+
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = ROOT / "data" / "newbuilds.js"
@@ -110,6 +142,8 @@ def main() -> None:
             "note": row["known_issues"].strip(),
             "asof": row["last_reviewed"].strip(),
         }
+        if is_warehouse(row):
+            rec["warehouse"] = True
         if lane == "B":
             rec["verify"] = gates.get(rec["id"], [])
         else:
@@ -122,6 +156,7 @@ def main() -> None:
         "B": sum(1 for r in kept if r["lane"] == "B"),
         "C ok": sum(1 for r in kept if r.get("verdict") == "ok"),
         "C bad": sum(1 for r in kept if r.get("verdict") == "bad"),
+        "warehouse": sum(1 for r in kept if r.get("warehouse")),
     }
 
     def js(row: dict) -> str:
@@ -141,6 +176,8 @@ def main() -> None:
 // {counts["B"]} B-investigate, {counts["C ok"]} C probably-ok holds (mostly future schemes),
 // {counts["C bad"]} C probably-bad holds (shown demoted, with specific warnings).
 // Dropped: not-applicable C holds and the unreviewed discovery pipeline.
+// {counts["warehouse"]} of the kept records are flagged warehouse: true (converted
+// warehouse / factory / printworks / brewery — derived here, not in the catalog).
 //
 // lane "B": verify = open due-diligence gates (check before committing),
 //   note = known-issues text from the catalog, asof = last review date.

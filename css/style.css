@@ -93,6 +93,32 @@ html, body {
   letter-spacing: -0.01em;
 }
 
+/* indented filter row under a layer, shown only while that layer is on */
+.row.sub {
+  padding: 2px 0 7px 14px;
+}
+
+.row.sub[hidden] {
+  display: none;
+}
+
+.row.sub .txt {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.row.sub .sw {
+  width: 28px;
+  height: 16px;
+  border-radius: 8px;
+}
+
+.row.sub .sw::after {
+  width: 12px;
+  height: 12px;
+}
+
 /* tiny uppercase pill for layers still in beta */
 .beta {
   font-size: 8.5px;
@@ -174,6 +200,10 @@ html, body {
 
 .row input:checked ~ .sw::after {
   transform: translateX(14px);
+}
+
+.row.sub input:checked ~ .sw::after {
+  transform: translateX(12px);
 }
 
 .row:hover .sw {
