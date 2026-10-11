@@ -403,7 +403,7 @@ const newbuildMarkers = (window.NEWBUILDS || []).map(d => {
   marker.warehouse = Boolean(d.warehouse);
   return marker;
 });
-const newbuilds = L.layerGroup(newbuildMarkers);  // off by default — toggled from the panel
+const newbuilds = L.layerGroup(newbuildMarkers).addTo(map);
 
 // "Warehouse conversions only" sub-filter: converted warehouses / factories /
 // printworks / breweries (flag derived in scripts/build-newbuilds.py).
@@ -590,7 +590,7 @@ const livabilityCats = {
   }
 };
 
-const livability = new LivabilityLayer(livabilityCats, window.ZONE || []).addTo(map);
+const livability = new LivabilityLayer(livabilityCats, window.ZONE || []);  // off by default
 
 /* =============================== Controls =============================== */
 
@@ -613,6 +613,12 @@ for (const [id, layer] of Object.entries(toggles)) {
     else map.removeLayer(layer);
   });
 }
+
+// The legend belongs to the heat map; hide it while that layer is off.
+const legend = document.getElementById('legend');
+document.getElementById('toggle-livability').addEventListener('change', e => {
+  legend.hidden = !e.target.checked;
+});
 
 // The warehouse filter row only shows while the New-builds layer is on.
 const warehouseRow = document.getElementById('row-warehouse');

@@ -218,6 +218,10 @@ html, body {
 
 /* ---------- Legend ---------- */
 
+.legend[hidden] {
+  display: none;
+}
+
 .legend {
   display: flex;
   align-items: center;

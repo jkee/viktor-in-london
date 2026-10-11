@@ -67,7 +67,7 @@
 
     <div class="rows">
       <label class="row">
-        <input type="checkbox" id="toggle-livability" checked>
+        <input type="checkbox" id="toggle-livability">
         <span class="txt">Heat map <span class="src"><a href="methodology.html">formula</a></span></span>
         <span class="sw" aria-hidden="true"></span>
       </label>
@@ -92,11 +92,11 @@
         <span class="sw" aria-hidden="true"></span>
       </label>
       <label class="row">
-        <input type="checkbox" id="toggle-newbuilds">
+        <input type="checkbox" id="toggle-newbuilds" checked>
         <span class="txt">New-builds <span class="beta">beta</span> <span class="src"><a href="https://github.com/jkee/london-newbuilds" target="_blank" rel="noopener">research</a></span></span>
         <span class="sw" aria-hidden="true"></span>
       </label>
-      <label class="row sub" id="row-warehouse" hidden>
+      <label class="row sub" id="row-warehouse">
         <input type="checkbox" id="toggle-warehouse">
         <span class="txt">Warehouse conversions only</span>
         <span class="sw" aria-hidden="true"></span>
@@ -115,7 +115,7 @@
 
     <div class="divider"></div>
 
-    <div class="legend">
+    <div class="legend" id="legend" hidden>
       <span class="legend-label">quiet</span>
       <div class="legend-bar"></div>
       <span class="legend-label">great</span>
