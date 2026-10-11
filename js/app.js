@@ -379,7 +379,7 @@ const gyms = L.layerGroup((window.GYMS || []).map(g => {
     g.url || b.url
   ), { maxHeight: 280 });
   return marker;
-}));  // off by default — toggled from the panel
+})).addTo(map);
 
 
 /* ============================== New-builds ============================== */
