@@ -8,6 +8,8 @@
  *   food     — restaurants rated 8.0+ (🍽 badges; 9.0+ gets a bold ring)
  *   stations — tube / rail stations (🚇 badges; hubs get a bold ring)
  *   wealth   — "good life" district signals (🥑: Waitrose, GAIL's, Aesop, Whole Foods)
+ *   gyms     — gym / studio branches with Viktor's brand marks (🏋 badges;
+ *              shortlist gets a bold ring, mass-market chains a muted badge)
  *   newbuilds — reviewed new-build/conversion candidates (🏢 badges),
  *               with a "warehouse conversions only" sub-filter
  *   crime    — combined crime severity density (violet surface)
@@ -345,6 +347,40 @@ const wealth = L.layerGroup((window.WEALTH || []).map(w => {
   return marker;
 })).addTo(map);
 
+/* ================================= Gyms ================================= */
+/* Branches of the gym brands from Viktor's shortlist research
+ * (data/gyms.js). Brand-level mark, price and verdict go into every branch
+ * popup. Shortlist brands get a bold ring; mass-market chains a muted badge
+ * and a "Chain" tag; class studios say so. */
+
+const gymBrands = window.GYM_BRANDS || {};
+
+const gyms = L.layerGroup((window.GYMS || []).map(g => {
+  const b = gymBrands[g.brand] || {};
+  const title = `${g.brand} — ${g.name}`;
+  const variant = b.chain ? 'gym-chain' : 'gym';
+  const marker = L.marker([g.lat, g.lng], { icon: badgeIcon('🏋', variant, Boolean(b.top)), title });
+  const tags = [
+    b.chain && 'Chain',
+    b.studio && 'Class studio — not an open weights gym',
+    g.visit && '★ Visit first',
+    g.soon && 'Coming soon'
+  ].filter(Boolean).join(' · ');
+  marker.bindPopup(popupHtml(
+    title + (b.mark ? ` · ${b.mark}/10` : ''),
+    [
+      tags ? { text: tags, cls: 'tag' } : null,
+      b.verdict,
+      b.price,
+      g.address,
+      b.says ? { text: b.says, cls: 'issue' } : null
+    ],
+    'Mark = fit for Viktor, not a review average · prices as of 2026-10-11',
+    g.url || b.url
+  ), { maxHeight: 280 });
+  return marker;
+}));  // off by default — toggled from the panel
+
 
 /* ============================== New-builds ============================== */
 /* Reviewed records from the london-newbuilds research project
@@ -601,6 +637,7 @@ const toggles = {
   'toggle-food': food,
   'toggle-tube': stations,
   'toggle-wealth': wealth,
+  'toggle-gyms': gyms,
   'toggle-newbuilds': newbuilds,
   'toggle-crime': crimeHeat
 };

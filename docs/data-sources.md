@@ -71,6 +71,23 @@ Branch locations of four chains used as a wealthy-pleasant-district proxy:
 official store finders (fetched 2026-09), filtered to the zone + 500 m buffer.
 No tiers; one avocado 🥑 badge per branch.
 
+## gyms.js — gyms and class studios
+
+Brands from Viktor's gym shortlist research (Oct 2026; prices checked
+2026-10-11). `GYM_BRANDS` holds the per-brand assessment shown in every
+branch popup: a 0–10 mark for personal fit (not a review average), price
+notes, verdict and a one-line summary of member feedback. Flags: `top`
+(shortlist → bold ring), `chain` (mass-market chain → muted badge and a
+"Chain" tag), `studio` (class studio, not an open weights gym).
+
+`GYMS` lists every branch of those brands inside the zone + 500 m buffer,
+from the brands' official club / location pages (fetched 2026-10) and
+geocoded from the full postcode via postcodes.io (postcode-centroid
+accuracy). `visit: true` marks the "visit these first" branches.
+
+To refresh: re-collect branch addresses with postcodes from the official
+club finders, geocode via postcodes.io, filter to zone + 500 m, merge.
+
 ## crime.js — crime density ("Crime heat")
 
 One combined severity score per LSOA (stored ×100):

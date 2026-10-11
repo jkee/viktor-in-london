@@ -10,7 +10,7 @@ heat surface in five teal grades (the deeper the wash, the more liveable)
 blending connectivity, coffee, food and daily-life amenities — methodology in
 [docs/livability.md](docs/livability.md). Around them sit reference layers —
 specialty coffee, casual restaurants rated 8.0+, stations, "good life" chains,
-a violet crime-severity overlay, and reviewed new-build candidates from the
+gyms marked for fit, a violet crime-severity overlay, and reviewed new-build candidates from the
 [london-newbuilds](https://github.com/jkee/london-newbuilds) research project —
 all scoped to roughly TfL Zones 1–2.
 
@@ -44,6 +44,7 @@ data/
   stations.js                 tube/rail stations              → window.STATIONS
   wealth.js                   "good life" chain markers       → window.WEALTH
   crime.js                    crime density per LSOA          → window.CRIME
+  gyms.js                     gym branches + brand marks      → window.GYMS, GYM_BRANDS
   newbuilds.js                reviewed new-build candidates   → window.NEWBUILDS
 scripts/
   build-newbuilds.py          regenerates newbuilds.js from the research release

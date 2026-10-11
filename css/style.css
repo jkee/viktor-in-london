@@ -493,6 +493,10 @@ html, body {
 
 .badge--wealth { border: 1px solid #74a12e; background: #f7fbe8; }
 
+.badge--gym { border: 1px solid #d6336c; background: #fff0f6; }
+.badge--gym-bold { border: 2px solid #a61e4d; background: #ffdeeb; }
+.badge--gym-chain { border: 1px solid #adb5bd; background: #f8f9fa; }
+
 .badge--newbuilds { border: 1px solid var(--navy); background: #eef0ff; }
 .badge--newbuilds-future { border: 1px dashed var(--navy); background: #eef0ff; }
 .badge--newbuilds-warn { border: 2px solid #e8590c; background: #fff4e6; }
